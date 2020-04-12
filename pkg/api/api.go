@@ -17,6 +17,7 @@ func CreateServer(c *Controller) *http.ServeMux {
 type Controller struct{}
 
 func (c Controller) storeResults(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	switch {
 	case r.Method != http.MethodPost:
 		log.Printf("protocol %s not supported", r.Method)
@@ -45,7 +46,7 @@ func handleResp(w http.ResponseWriter, r *http.Request) {
 
 func writeResp(w http.ResponseWriter, statusCode int, message string) {
 	w.WriteHeader(statusCode)
-	_, err := fmt.Fprint(w, fmt.Sprintf(`{"statusCode": %d, "message": %s}`, statusCode, message))
+	_, err := fmt.Fprint(w, fmt.Sprintf(`{"statusCode": %d, "message": "%s"}`, statusCode, message))
 	if err != nil {
 		log.Fatalf("error writing to stream: %v", err)
 	}

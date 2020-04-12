@@ -1,0 +1,29 @@
+version: '3.4'
+services:
+  markr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    ports:
+      - '3003:3003'
+    environment:
+      MYSQL_MASTER_PASSWORD: ${DB_PW}
+      MYSQL_MASTER_USERNAME: root
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_HOST_URL: db
+      MYSQL_HOST_PORT: 3306
+    volumes:
+      - './:/app'
+    command: [go, run, main.go]
+    depends_on:
+      - db
+  db:
+    image: mysql:8.0
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PW}
+    ports:
+      - '3306:3306'

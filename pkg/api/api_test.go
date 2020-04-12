@@ -28,7 +28,7 @@ func TestStoreResultsReturns200(t *testing.T) {
 	c := Controller{}
 	c.storeResults(recorder, testRequest)
 	assert.Equal(t, 200, recorder.Code)
-	assert.Equal(t, `{"statusCode": 200, "message": Record successfully saved}`, recorder.Body.String())
+	assert.Equal(t, `{"statusCode": 200, "message": "Record successfully saved"}`, recorder.Body.String())
 }
 
 func TestStoreResultsFail(t *testing.T) {
@@ -44,14 +44,14 @@ func TestStoreResultsFail(t *testing.T) {
 			url:        "/import",
 			protocol:   "POST",
 			statusCode: 415,
-			resp:       `{"statusCode": 415, "message": Content-Type  not supported}`,
+			resp:       `{"statusCode": 415, "message": "Content-Type  not supported"}`,
 		},
 		{
 			name:       "unsupported_protocol",
 			url:        "/import",
 			protocol:   "GET",
 			statusCode: 403,
-			resp:       `{"statusCode": 403, "message": Protocol GET not supported for endpoint /import}`,
+			resp:       `{"statusCode": 403, "message": "Protocol GET not supported for endpoint /import"}`,
 		},
 	}
 	c := Controller{}
