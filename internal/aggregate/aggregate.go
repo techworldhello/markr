@@ -3,8 +3,8 @@ package aggregate
 import (
 	"encoding/json"
 	"github.com/montanaflynn/stats"
+	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/data"
-	"log"
 )
 
 func CalculateAverage(scores []float64) string {
@@ -30,7 +30,7 @@ func CalculateAverage(scores []float64) string {
 
 	aggregateBytes, err := json.Marshal(&a)
 	if err != nil {
-		log.Print(err)
+		log.Errorf("error marshalling aggregate struct to json: %v", err)
 	}
 	return string(aggregateBytes)
 }

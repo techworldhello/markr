@@ -4,9 +4,9 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/data"
 	"github.com/techworldhello/markr/internal/db"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -26,7 +26,7 @@ type Controller struct{
 func (c Controller) saveResult(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method != http.MethodPost:
-		log.Printf("protocol %s not supported", r.Method)
+		log.Errorf("protocol %s not supported", r.Method)
 		handleIncorrectProtocol(w, r)
 	default:
 		c.handleSave(w, r)
@@ -36,7 +36,7 @@ func (c Controller) saveResult(w http.ResponseWriter, r *http.Request) {
 func (c Controller) getAggregate(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method != http.MethodGet:
-		log.Printf("protocol %s not supported", r.Method)
+		log.Errorf("protocol %s not supported", r.Method)
 		handleIncorrectProtocol(w, r)
 	default:
 		c.handleAggregate(w, r)
@@ -53,17 +53,17 @@ func (c Controller) handleSave(w http.ResponseWriter, r *http.Request) {
 
 	decoder := xml.NewDecoder(r.Body)
 	if err := decoder.Decode(&data); err != nil {
-		log.Fatal(err)
+		log.Errorf("error unmarshalling request body: %v", err)
 	}
 
 	if missing := fieldsAreMissing(data); missing != false {
-		log.Printf("field/s are missing from result data: %+v", data)
+		log.Warnf("field/s are missing from result data: %+v", data)
 		writeResp(w, http.StatusUnprocessableEntity, "Incomplete data - please check that all fields are fulfilled.")
 		return
 	}
 
 	if err := c.Save(data); err != nil {
-		log.Printf("error savings results: %v", err)
+		log.Errorf("error savings results: %v", err)
 		handleDbProcessingError(w)
 		return
 	}
@@ -81,6 +81,7 @@ func (c Controller) handleAggregate(w http.ResponseWriter, r *http.Request) {
 
 	scores, err := c.RetrieveScores(testID)
 	if err != nil {
+		log.Errorf("error retrieving scores for test ID %s: %v", testID, err)
 		handleDbProcessingError(w)
 		return
 	}

@@ -19,6 +19,7 @@ func init() {
 }
 
 func main() {
+	initLogger()
 	server := api.CreateServer(&api.Controller{db.New(sqlDb)})
 
 	log.Print("Starting server on port 4567..")

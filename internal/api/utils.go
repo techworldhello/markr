@@ -2,9 +2,9 @@ package api
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/aggregate"
 	"github.com/techworldhello/markr/internal/data"
-	"log"
 	"net/http"
 	"time"
 )
@@ -14,7 +14,7 @@ func writeResp(w http.ResponseWriter, statusCode int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	_, err := fmt.Fprint(w, fmt.Sprintf(`{"statusCode": %d, "message": "%s"}`, statusCode, message))
 	if err != nil {
-		log.Fatalf("error writing to stream: %v", err)
+		log.Errorf("error writing to stream: %v", err)
 	}
 }
 
@@ -23,7 +23,7 @@ func writeResults(w http.ResponseWriter, scores []float64) {
 	w.WriteHeader(http.StatusOK)
 	_, err := fmt.Fprint(w, aggregate.CalculateAverage(scores))
 	if err != nil {
-		log.Fatalf("error writing to stream: %v", err)
+		log.Errorf("error writing to stream: %v", err)
 	}
 }
 

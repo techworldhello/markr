@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/data"
-	"log"
 	"os"
 	"time"
 )
@@ -26,12 +26,12 @@ func New(db *sql.DB) *Store {
 func OpenConnection() (*sql.DB, error) {
 	db, err := sql.Open("mysql", "root:password@tcp(db:3306)/markr")
 	if err != nil {
-		log.Printf("error connecting to db: %+v", err)
+		log.Errorf("error connecting to db: %+v", err)
 		return nil, err
 	}
 
 	if err = db.Ping(); err != nil {
-		log.Printf("cannot ping db: %v", err)
+		log.Errorf("cannot ping db: %v", err)
 		return nil, err
 	}
 
@@ -42,7 +42,7 @@ func OpenConnection() (*sql.DB, error) {
 func (s Store) Save(m data.McqTestResults) error {
 	txn, err := s.Db.Begin()
 	if err != nil {
-		log.Printf("error starting db transaction: %v", err)
+		log.Errorf("error starting db transaction: %v", err)
 		return err
 	}
 
@@ -50,25 +50,25 @@ func (s Store) Save(m data.McqTestResults) error {
 (student_number, test_id, first_name, last_name, total_available, total_obtained, scanned_on, created_at)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`)
 	if err != nil {
-		log.Print(err)
 		return err
 	}
 
 	for _, result := range m.Results {
 		sqlSum, err := saveToTable(stmt, result)
 		if err != nil {
+			log.Errorf("error saving record: %v", err)
 			return err
 		}
 		rs, err := sqlSum.RowsAffected()
 		if rs != 1 || err != nil {
-			log.Printf("rows affected: %d\nerror: %v", rs, err)
+			log.Errorf("rows affected: %d\nerror: %v", rs, err)
 			txn.Rollback()
 			return err
 		}
 	}
 
 	if err := txn.Commit(); err != nil {
-		log.Printf("error commiting db transaction: %v", err)
+		log.Errorf("error commiting db transaction: %v", err)
 		return err
 	}
 
@@ -78,7 +78,7 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`)
 func (s Store) RetrieveScores(testId string) ([]float64, error) {
 	rows, err := s.Db.Query(fmt.Sprintf("SELECT * FROM %s WHERE test_id = ?", os.Getenv("DB_NAME")), testId)
 	if err != nil {
-		log.Printf("error querying DB for testId %s: %v", testId, err)
+		log.Errorf("error querying DB for testId %s: %v", testId, err)
 		return []float64{}, err
 	}
 	return getScores(rows)
