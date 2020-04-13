@@ -9,15 +9,15 @@ type McqTestResults struct {
 }
 
 type TestResult struct {
-	ScannedOn     time.Time `xml:"scanned-on"`
+	ScannedOn     time.Time `xml:"scanned-on,attr"`
 	FirstName     string    `xml:"first-name"`
 	LastName      string    `xml:"last-name"`
 	StudentNumber int       `xml:"student-number"`
 	TestID        int       `xml:"test-id"`
-	*SummaryMarks `xml:"summary-marks"`
+	SummaryMarks *SummaryMarks `xml:"summary-marks"`
 }
 
-type SummaryMarks  struct {
+type SummaryMarks struct {
 	Available int `xml:"available,attr"`
 	Obtained  int `xml:"obtained,attr"`
 }

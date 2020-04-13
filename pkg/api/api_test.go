@@ -28,6 +28,19 @@ func TestSaveResultReturns200(t *testing.T) {
 	assert.Equal(t, `{"statusCode": 200, "message": "Record successfully saved"}`, recorder.Body.String())
 }
 
+func TestSaveResultWithIncompleteReqBody(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	testRequest, _ := http.NewRequest("POST", "/import", bytes.NewBuffer([]byte(data.IncompleteRequestBody)))
+	testRequest.Header.Add("Content-Type", "text/xml+markr")
+
+	c := Controller{MockStore{}}
+	c.saveResult(recorder, testRequest)
+
+	assert.Equal(t, 422, recorder.Code)
+	assert.Equal(t, `{"statusCode": 422, "message": "Incomplete data - please check that all fields are fulfilled."}`, recorder.Body.String())
+}
+
 func TestSaveResultFail(t *testing.T) {
 	expectations := []struct {
 		name       string

@@ -41,25 +41,24 @@ func (c Controller) handleSave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var m data.McqTestResults
+	var data data.McqTestResults
+
 	decoder := xml.NewDecoder(r.Body)
-	if err := decoder.Decode(&m); err != nil {
+	if err := decoder.Decode(&data); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := c.Save(m); err != nil {
+	if missing := fieldsAreMissing(data); missing != false {
+		log.Printf("field/s are missing from result data: %+v", data)
+		writeResp(w, http.StatusUnprocessableEntity, "Incomplete data - please check that all fields are fulfilled.")
+		return
+	}
+
+	if err := c.Save(data); err != nil {
 		log.Printf("error savings results: %v", err)
 		writeResp(w, http.StatusInternalServerError, "Error saving record/s - please try again later.")
 		return
 	}
 
 	writeResp(w, http.StatusOK, "Record successfully saved")
-}
-
-func writeResp(w http.ResponseWriter, statusCode int, message string) {
-	w.WriteHeader(statusCode)
-	_, err := fmt.Fprint(w, fmt.Sprintf(`{"statusCode": %d, "message": "%s"}`, statusCode, message))
-	if err != nil {
-		log.Fatalf("error writing to stream: %v", err)
-	}
 }

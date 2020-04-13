@@ -62,6 +62,15 @@ var RequestBody = `<?xml version="1.0" encoding="UTF-8" ?>
 	</mcq-test-result>
 </mcq-test-results>`
 
+var IncompleteRequestBody = `<?xml version="1.0" encoding="UTF-8" ?>
+<mcq-test-results>
+	<mcq-test-result scanned-on="2017-12-04T12:12:10+11:00">
+		<first-name>KJ</first-name>
+		<last-name>Alysander</last-name>
+		<student-number>002299</student-number>
+	</mcq-test-result>
+</mcq-test-results>`
+
 var ScannedTime = time.Now()
 
 func GetTestResults() McqTestResults{
