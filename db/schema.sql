@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS student_result (
   created_at timestamp NOT NULL
 );
 
--- Create index on total_obtained column
+-- Create index on test_id column
 
-ALTER TABLE student_result ADD INDEX (total_obtained);
+ALTER TABLE student_result ADD INDEX (test_id);
 
 COMMIT;

@@ -3,17 +3,20 @@ package api
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/techworldhello/markr/pkg/data"
-	"github.com/techworldhello/markr/pkg/db"
+	"github.com/gorilla/mux"
+	"github.com/techworldhello/markr/internal/data"
+	"github.com/techworldhello/markr/internal/db"
 	"log"
 	"net/http"
+	"strings"
 )
 
-func CreateServer(c *Controller) *http.ServeMux {
-	server := http.ServeMux{}
+func CreateServer(c *Controller) *mux.Router {
+	router := mux.NewRouter()
 
-	server.HandleFunc("/import", c.saveResult)
-	return &server
+	router.HandleFunc("/import", c.saveResult)
+	router.HandleFunc("/results/{test-id}/aggregate", c.getAggregate)
+	return router
 }
 
 type Controller struct{
@@ -21,7 +24,6 @@ type Controller struct{
 }
 
 func (c Controller) saveResult(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	switch {
 	case r.Method != http.MethodPost:
 		log.Printf("protocol %s not supported", r.Method)
@@ -31,8 +33,14 @@ func (c Controller) saveResult(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleIncorrectProtocol(w http.ResponseWriter, r *http.Request) {
-	writeResp(w, http.StatusForbidden, fmt.Sprintf("Protocol %s not supported for endpoint %s", r.Method, r.RequestURI))
+func (c Controller) getAggregate(w http.ResponseWriter, r *http.Request) {
+	switch {
+	case r.Method != http.MethodGet:
+		log.Printf("protocol %s not supported", r.Method)
+		handleIncorrectProtocol(w, r)
+	default:
+		c.handleAggregate(w, r)
+	}
 }
 
 func (c Controller) handleSave(w http.ResponseWriter, r *http.Request) {
@@ -61,4 +69,15 @@ func (c Controller) handleSave(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeResp(w, http.StatusOK, "Record successfully saved")
+}
+
+func (c Controller) handleAggregate(w http.ResponseWriter, r *http.Request) {
+	p := strings.Split(r.URL.Path, "/")
+	testID := p[2]
+	if testID == "" {
+		writeResp(w, http.StatusUnprocessableEntity, "Test ID must be supplied in params.")
+		return
+	}
+	// calculate result
+	writeResp(w, http.StatusOK, testID)
 }

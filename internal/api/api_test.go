@@ -3,17 +3,11 @@ package api
 import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
-	"github.com/techworldhello/markr/pkg/data"
+	"github.com/techworldhello/markr/internal/data"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
-
-type MockStore struct {}
-
-func (m MockStore) Save(data.McqTestResults) error {
-	return nil
-}
 
 func TestSaveResultReturns200(t *testing.T) {
 	recorder := httptest.NewRecorder()
@@ -75,4 +69,26 @@ func TestSaveResultFail(t *testing.T) {
 			assert.Equal(t, expect.resp, recorder.Body.String())
 		})
 	}
+}
+
+func TestGetAggregateReturns200(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	testRequest, _ := http.NewRequest("GET", "/results/1234/aggregate", nil)
+
+	c := Controller{MockStore{}}
+	c.getAggregate(recorder, testRequest)
+
+	assert.Equal(t, 200, recorder.Code)
+	assert.Equal(t, `{"statusCode": 200, "message": "1234"}`, recorder.Body.String())
+}
+
+type MockStore struct {}
+
+func (m MockStore) Save(data.McqTestResults) error {
+	return nil
+}
+
+func (m MockStore) Get(studentId string) (string, error) {
+	return "", nil
 }

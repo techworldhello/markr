@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"github.com/techworldhello/markr/pkg/data"
+	"github.com/techworldhello/markr/internal/data"
 	"log"
 	"net/http"
 	"time"
@@ -10,10 +10,15 @@ import (
 
 func writeResp(w http.ResponseWriter, statusCode int, message string) {
 	w.WriteHeader(statusCode)
+	w.Header().Set("Content-Type", "application/json")
 	_, err := fmt.Fprint(w, fmt.Sprintf(`{"statusCode": %d, "message": "%s"}`, statusCode, message))
 	if err != nil {
 		log.Fatalf("error writing to stream: %v", err)
 	}
+}
+
+func handleIncorrectProtocol(w http.ResponseWriter, r *http.Request) {
+	writeResp(w, http.StatusForbidden, fmt.Sprintf("Protocol %s not supported for endpoint %s", r.Method, r.RequestURI))
 }
 
 func fieldsAreMissing(m data.McqTestResults) bool {

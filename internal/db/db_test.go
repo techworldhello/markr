@@ -2,7 +2,7 @@ package db
 
 import (
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/techworldhello/markr/pkg/data"
+	"github.com/techworldhello/markr/internal/data"
 	"log"
 	"testing"
 )

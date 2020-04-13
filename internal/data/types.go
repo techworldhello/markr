@@ -21,3 +21,14 @@ type SummaryMarks struct {
 	Available int `xml:"available,attr"`
 	Obtained  int `xml:"obtained,attr"`
 }
+
+type Aggregate struct {
+	Mean   float64 `json:"mean"`
+	Stddev float64 `json:"stddev"`
+	Min    float64 `json:"min"`
+	Max    float64 `json:"max"`
+	P25    float64 `json:"p25"`
+	P50    float64 `json:"p50"`
+	P75    float64 `json:"p75"`
+	Count  int     `json:"count"`
+}

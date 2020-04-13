@@ -3,13 +3,14 @@ package db
 import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/techworldhello/markr/pkg/data"
+	"github.com/techworldhello/markr/internal/data"
 	"log"
 	"time"
 )
 
 type Database interface {
 	Save(m data.McqTestResults) error
+	Get(testID string) (string, error)
 }
 
 type Store struct {
@@ -36,7 +37,7 @@ func OpenConnection() (*sql.DB, error) {
 	return db, nil
 }
 
-func(s Store) Save(m data.McqTestResults) error {
+func (s Store) Save(m data.McqTestResults) error {
 	txn, err := s.Db.Begin()
 	if err != nil {
 		log.Printf("error starting db transaction: %v", err)
@@ -70,6 +71,10 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`)
 	}
 
 	return nil
+}
+
+func (s Store) Get(testID string) (string, error) {
+	return `{"mean":65.0,"stddev":0.0,"min":65.0,"max":65.0,"p25":65.0,"p50":65.0,"p75":65.0,"count":1}`, nil
 }
 
 var Now = time.Now()
