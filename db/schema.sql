@@ -1,16 +1,17 @@
 START TRANSACTION;
 
+-- Create database markr if not already initialised by docker config
+
 CREATE DATABASE IF NOT EXISTS markr;
 
 USE markr;
 
---
--- Name: student_results; Type: TABLE; Independent
---
+-- Create table within DB named student_result
 
-CREATE TABLE IF NOT EXISTS student_results (
-id bigint primary key AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS student_result (
+  id bigint primary key AUTO_INCREMENT,
   student_number smallint NOT NULL,
+  test_id smallint NOT NULL,
   first_name varchar(256) NOT NULL,
   last_name varchar(256) NOT NULL,
   total_available smallint NOT NULL,
@@ -19,22 +20,8 @@ id bigint primary key AUTO_INCREMENT,
   created_at timestamp NOT NULL
 );
 
---
--- Name: marks; Type: TABLE; Dependent on marks
---
-
-CREATE TABLE IF NOT EXISTS marks (
-  id bigint primary key AUTO_INCREMENT,
-  student_number smallint NOT NULL REFERENCES student_results(student_number),
-  test_id smallint NOT NULL,
-  question smallint NOT NULL,
-  available smallint NOT NULL,
-  obtained smallint NOT NULL,
-  created_at timestamp NOT NULL
-);
-
 -- Create index on total_obtained column
 
-ALTER TABLE student_results ADD INDEX (total_obtained);
+ALTER TABLE student_result ADD INDEX (total_obtained);
 
 COMMIT;

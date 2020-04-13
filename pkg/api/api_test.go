@@ -3,35 +3,32 @@ package api
 import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
+	"github.com/techworldhello/markr/pkg/data"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-var body = `
-<mcq-test-results>
-    <mcq-test-result scanned-on="2017-12-04T12:12:10+11:00">
-        <first-name>Jane</first-name>
-        <last-name>Austen</last-name>
-        <student-number>521585128</student-number>
-        <test-id>1234</test-id>
-        <summary-marks available="20" obtained="13" />
-    </mcq-test-result>
-</mcq-test-results>`
+type MockStore struct {}
 
-func TestStoreResultsReturns200(t *testing.T) {
+func (m MockStore) Save(data.McqTestResults) error {
+	return nil
+}
+
+func TestSaveResultReturns200(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
-	testRequest, _ := http.NewRequest("POST", "/import", bytes.NewBuffer([]byte(body)))
+	testRequest, _ := http.NewRequest("POST", "/import", bytes.NewBuffer([]byte(data.RequestBody)))
 	testRequest.Header.Add("Content-Type", "text/xml+markr")
 
-	c := Controller{}
-	c.storeResults(recorder, testRequest)
+	c := Controller{MockStore{}}
+	c.saveResult(recorder, testRequest)
+
 	assert.Equal(t, 200, recorder.Code)
 	assert.Equal(t, `{"statusCode": 200, "message": "Record successfully saved"}`, recorder.Body.String())
 }
 
-func TestStoreResultsFail(t *testing.T) {
+func TestSaveResultFail(t *testing.T) {
 	expectations := []struct {
 		name       string
 		url        string
@@ -58,8 +55,8 @@ func TestStoreResultsFail(t *testing.T) {
 	for _, expect := range expectations {
 		t.Run(expect.name, func(t *testing.T) {
 			recorder := httptest.NewRecorder()
-			request := httptest.NewRequest(expect.protocol, expect.url, bytes.NewBuffer([]byte(body)))
-			c.storeResults(recorder, request)
+			request := httptest.NewRequest(expect.protocol, expect.url, bytes.NewBuffer([]byte(data.RequestBody)))
+			c.saveResult(recorder, request)
 
 			assert.Equal(t, expect.statusCode, recorder.Code)
 			assert.Equal(t, expect.resp, recorder.Body.String())
