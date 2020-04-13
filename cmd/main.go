@@ -8,17 +8,18 @@ import (
 	"net/http"
 )
 
+var sqlDb *sql.DB
 
-func initDB() *sql.DB {
+func init() {
 	db, err := db.OpenConnection()
 	if err != nil {
 		log.Fatalf("error connecting to DB: %v", err)
 	}
-	return db
+	sqlDb = db
 }
 
 func main() {
-	server := api.CreateServer(&api.Controller{db.New(initDB())})
+	server := api.CreateServer(&api.Controller{db.New(sqlDb)})
 
 	log.Print("Starting server on port 4567..")
 	if err := http.ListenAndServe(":4567", server); err != nil {

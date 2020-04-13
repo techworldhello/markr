@@ -64,7 +64,7 @@ func (c Controller) handleSave(w http.ResponseWriter, r *http.Request) {
 
 	if err := c.Save(data); err != nil {
 		log.Printf("error savings results: %v", err)
-		writeResp(w, http.StatusInternalServerError, "Error saving record/s - please try again later.")
+		handleDbProcessingError(w)
 		return
 	}
 
@@ -78,6 +78,17 @@ func (c Controller) handleAggregate(w http.ResponseWriter, r *http.Request) {
 		writeResp(w, http.StatusUnprocessableEntity, "Test ID must be supplied in params.")
 		return
 	}
-	// calculate result
-	writeResp(w, http.StatusOK, testID)
+
+	scores, err := c.RetrieveScores(testID)
+	if err != nil {
+		handleDbProcessingError(w)
+		return
+	}
+
+	if len(scores) == 0 {
+		writeResp(w, http.StatusNotFound, fmt.Sprintf("No results were found for Test ID %s", testID))
+		return
+	}
+
+	writeResults(w, scores)
 }

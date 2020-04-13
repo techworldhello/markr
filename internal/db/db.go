@@ -2,15 +2,17 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/techworldhello/markr/internal/data"
 	"log"
+	"os"
 	"time"
 )
 
 type Database interface {
 	Save(m data.McqTestResults) error
-	Get(testID string) (string, error)
+	RetrieveScores(testId string) ([]float64, error)
 }
 
 type Store struct {
@@ -73,8 +75,26 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`)
 	return nil
 }
 
-func (s Store) Get(testID string) (string, error) {
-	return `{"mean":65.0,"stddev":0.0,"min":65.0,"max":65.0,"p25":65.0,"p50":65.0,"p75":65.0,"count":1}`, nil
+func (s Store) RetrieveScores(testId string) ([]float64, error) {
+	rows, err := s.Db.Query(fmt.Sprintf("SELECT * FROM %s WHERE test_id = ?", os.Getenv("DB_NAME")), testId)
+	if err != nil {
+		log.Printf("error querying DB for testId %s: %v", testId, err)
+		return []float64{}, err
+	}
+	return getScores(rows)
+}
+
+func getScores(rows *sql.Rows) (scores []float64, err error) {
+	defer rows.Close()
+	var tr data.TestResult
+	for rows.Next() {
+		if err := rows.Scan(&tr.Id, &tr.ScannedOn, &tr.StudentNumber, &tr.FirstName, &tr.LastName,
+			&tr.TestID, &tr.SummaryMarks.Available, &tr.SummaryMarks.Obtained, &tr.CreatedAt); err != nil {
+			log.Printf("error copying from columns: %v", err)
+		}
+		scores = append(scores, float64(tr.SummaryMarks.Obtained))
+	}
+	return scores, nil
 }
 
 var Now = time.Now()

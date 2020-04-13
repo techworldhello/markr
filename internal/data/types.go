@@ -9,6 +9,8 @@ type McqTestResults struct {
 }
 
 type TestResult struct {
+	Id int
+	CreatedAt time.Time
 	ScannedOn     time.Time `xml:"scanned-on,attr"`
 	FirstName     string    `xml:"first-name"`
 	LastName      string    `xml:"last-name"`

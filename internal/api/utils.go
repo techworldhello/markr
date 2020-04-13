@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/techworldhello/markr/internal/aggregate"
 	"github.com/techworldhello/markr/internal/data"
 	"log"
 	"net/http"
@@ -17,8 +18,21 @@ func writeResp(w http.ResponseWriter, statusCode int, message string) {
 	}
 }
 
+
+func writeResults(w http.ResponseWriter, scores []float64) {
+	w.WriteHeader(http.StatusOK)
+	_, err := fmt.Fprint(w, aggregate.CalculateAverage(scores))
+	if err != nil {
+		log.Fatalf("error writing to stream: %v", err)
+	}
+}
+
 func handleIncorrectProtocol(w http.ResponseWriter, r *http.Request) {
 	writeResp(w, http.StatusForbidden, fmt.Sprintf("Protocol %s not supported for endpoint %s", r.Method, r.RequestURI))
+}
+
+func handleDbProcessingError(w http.ResponseWriter) {
+	writeResp(w, http.StatusInternalServerError, "Error processing record/s - please try again later.")
 }
 
 func fieldsAreMissing(m data.McqTestResults) bool {

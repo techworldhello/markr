@@ -80,7 +80,7 @@ func TestGetAggregateReturns200(t *testing.T) {
 	c.getAggregate(recorder, testRequest)
 
 	assert.Equal(t, 200, recorder.Code)
-	assert.Equal(t, `{"statusCode": 200, "message": "1234"}`, recorder.Body.String())
+	assert.Equal(t, `{"mean":65,"stddev":0,"min":65,"max":65,"p25":65,"p50":65,"p75":65,"count":1}`, recorder.Body.String())
 }
 
 type MockStore struct {}
@@ -89,6 +89,6 @@ func (m MockStore) Save(data.McqTestResults) error {
 	return nil
 }
 
-func (m MockStore) Get(studentId string) (string, error) {
-	return "", nil
+func (m MockStore) RetrieveScores(testId string) ([]float64, error) {
+	return []float64{13}, nil
 }
