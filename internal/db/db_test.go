@@ -2,12 +2,13 @@ package db
 
 import (
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
 	"github.com/techworldhello/markr/internal/data"
 	"log"
 	"testing"
 )
 
-func TestSave(t *testing.T) {
+func TestSaveResults(t *testing.T) {
 	sqlDb, mock, err := sqlmock.New()
 	if err != nil {
 		log.Printf("error opening stub database connection: %v", err)
@@ -28,7 +29,30 @@ func TestSave(t *testing.T) {
 	mock.ExpectCommit()
 
 	c := Store{Db: sqlDb}
-	if err := c.Save(data.GetTestResults()); err != nil {
+	if err := c.SaveResults(data.GetTestResults()); err != nil {
 		t.Errorf("unexpected error: %s", err)
 	}
+}
+
+func TestRetrieveMarks(t *testing.T) {
+	sqlDb, mock, err := sqlmock.New()
+	if err != nil {
+		log.Printf("error opening stub database connection: %v", err)
+	}
+	defer sqlDb.Close()
+
+	var testId = "1234"
+
+	mock.ExpectQuery("^SELECT student_number, total_available, total_obtained FROM*").
+		WithArgs(testId).
+		WillReturnRows(sqlmock.NewRows([]string{"student_number", "total_available", "total_obtained"}).
+		AddRow( 1234, 20, 13))
+
+	c := Store{Db: sqlDb}
+	marks, err := c.RetrieveMarks(testId)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	assert.Equal(t, []DBMarksRecord{{1234, 20, 13}}, marks)
 }

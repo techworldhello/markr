@@ -5,18 +5,17 @@ import (
 )
 
 type McqTestResults struct {
-	Results []*TestResult `xml:"mcq-test-result"`
+	Results []TestResult `xml:"mcq-test-result"`
 }
 
 type TestResult struct {
-	Id int
-	CreatedAt time.Time
-	ScannedOn     time.Time `xml:"scanned-on,attr"`
-	FirstName     string    `xml:"first-name"`
-	LastName      string    `xml:"last-name"`
-	StudentNumber int       `xml:"student-number"`
-	TestID        int       `xml:"test-id"`
-	SummaryMarks *SummaryMarks `xml:"summary-marks"`
+	CreatedAt     time.Time
+	ScannedOn     time.Time     `xml:"scanned-on,attr"`
+	FirstName     string        `xml:"first-name"`
+	LastName      string        `xml:"last-name"`
+	StudentNumber int           `xml:"student-number"`
+	TestID        int           `xml:"test-id"`
+	SummaryMarks  SummaryMarks `xml:"summary-marks"`
 }
 
 type SummaryMarks struct {

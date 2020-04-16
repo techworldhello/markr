@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
 	"github.com/techworldhello/markr/internal/data"
+	"github.com/techworldhello/markr/internal/db"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -85,10 +86,10 @@ func TestGetAggregateReturns200(t *testing.T) {
 
 type MockStore struct {}
 
-func (m MockStore) Save(data.McqTestResults) error {
+func (m MockStore) SaveResults(data data.McqTestResults) error {
 	return nil
 }
 
-func (m MockStore) RetrieveScores(testId string) ([]float64, error) {
-	return []float64{13}, nil
+func (m MockStore) RetrieveMarks(testId string) ([]db.DBMarksRecord, error) {
+	return []db.DBMarksRecord{{1234, 20, 13}}, nil
 }

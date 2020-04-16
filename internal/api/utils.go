@@ -3,7 +3,6 @@ package api
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"github.com/techworldhello/markr/internal/aggregate"
 	"github.com/techworldhello/markr/internal/data"
 	"net/http"
 	"time"
@@ -13,15 +12,6 @@ func writeResp(w http.ResponseWriter, statusCode int, message string) {
 	w.WriteHeader(statusCode)
 	w.Header().Set("Content-Type", "application/json")
 	_, err := fmt.Fprint(w, fmt.Sprintf(`{"statusCode": %d, "message": "%s"}`, statusCode, message))
-	if err != nil {
-		log.Errorf("error writing to stream: %v", err)
-	}
-}
-
-
-func writeResults(w http.ResponseWriter, scores []float64) {
-	w.WriteHeader(http.StatusOK)
-	_, err := fmt.Fprint(w, aggregate.CalculateAverage(scores))
 	if err != nil {
 		log.Errorf("error writing to stream: %v", err)
 	}
@@ -39,12 +29,11 @@ func fieldsAreMissing(m data.McqTestResults) bool {
 	if m.Results == nil {
 		return true
 	}
-	emptyTime := time.Time{}
 	for _, result := range m.Results {
 		if result.StudentNumber == 0 || result.TestID == 0 ||
 			result.FirstName == "" || result.LastName == "" ||
 			result.SummaryMarks.Obtained == 0 || result.SummaryMarks.Available == 0 ||
-			result.ScannedOn == emptyTime {
+			result.ScannedOn == (time.Time{}) {
 			return true
 		}
 	}

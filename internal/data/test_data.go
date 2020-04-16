@@ -75,14 +75,14 @@ var ScannedTime = time.Now()
 
 func GetTestResults() McqTestResults{
 	return McqTestResults{
-		Results: []*TestResult{
+		Results: []TestResult{
 			{
 				ScannedOn: ScannedTime,
 				FirstName: "Daniel",
 				LastName: "Craig",
 				StudentNumber: 1234,
 				TestID: 1,
-				SummaryMarks: &SummaryMarks{
+				SummaryMarks: SummaryMarks{
 					Available: 20,
 					Obtained: 18,
 				},
@@ -93,7 +93,7 @@ func GetTestResults() McqTestResults{
 				LastName: "Doe",
 				StudentNumber: 4321,
 				TestID: 2,
-				SummaryMarks: &SummaryMarks{
+				SummaryMarks: SummaryMarks{
 					Available: 20,
 					Obtained: 10,
 				},
@@ -104,7 +104,7 @@ func GetTestResults() McqTestResults{
 				LastName: "Squarepants",
 				StudentNumber: 1212,
 				TestID: 3,
-				SummaryMarks: &SummaryMarks{
+				SummaryMarks: SummaryMarks{
 					Available: 20,
 					Obtained: 14,
 				},

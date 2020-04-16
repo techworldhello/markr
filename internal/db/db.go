@@ -2,21 +2,16 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/data"
-	"os"
+	"sync"
 	"time"
 )
 
-type Database interface {
-	Save(m data.McqTestResults) error
-	RetrieveScores(testId string) ([]float64, error)
-}
-
 type Store struct {
 	Db *sql.DB
+	mu sync.RWMutex
 }
 
 func New(db *sql.DB) *Store {
@@ -39,7 +34,10 @@ func OpenConnection() (*sql.DB, error) {
 	return db, nil
 }
 
-func (s Store) Save(m data.McqTestResults) error {
+func (s Store) SaveResults(data data.McqTestResults) error {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
 	txn, err := s.Db.Begin()
 	if err != nil {
 		log.Errorf("error starting db transaction: %v", err)
@@ -53,7 +51,7 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`)
 		return err
 	}
 
-	for _, result := range m.Results {
+	for _, result := range data.Results {
 		sqlSum, err := saveToTable(stmt, result)
 		if err != nil {
 			log.Errorf("error saving record: %v", err)
@@ -75,34 +73,54 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`)
 	return nil
 }
 
-func (s Store) RetrieveScores(testId string) ([]float64, error) {
-	rows, err := s.Db.Query(fmt.Sprintf("SELECT * FROM %s WHERE test_id = ?", os.Getenv("DB_NAME")), testId)
+func (s Store) RetrieveMarks(testId string) ([]DBMarksRecord, error) {
+	rows, err := s.Db.Query(`SELECT student_number, total_available, total_obtained FROM student_result 
+WHERE test_id = ? ORDER BY student_number DESC, total_obtained DESC`, testId)
+
 	if err != nil {
 		log.Errorf("error querying DB for testId %s: %v", testId, err)
-		return []float64{}, err
+		return []DBMarksRecord{}, err
 	}
-	return getScores(rows)
+
+	return getMarks(rows)
 }
 
-func getScores(rows *sql.Rows) (scores []float64, err error) {
-	defer rows.Close()
-	var tr data.TestResult
-	for rows.Next() {
-		if err := rows.Scan(&tr.Id, &tr.ScannedOn, &tr.StudentNumber, &tr.FirstName, &tr.LastName,
-			&tr.TestID, &tr.SummaryMarks.Available, &tr.SummaryMarks.Obtained, &tr.CreatedAt); err != nil {
-			log.Printf("error copying from columns: %v", err)
-		}
-		scores = append(scores, float64(tr.SummaryMarks.Obtained))
-	}
-	return scores, nil
-}
+var Now, _ = time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 
-var Now = time.Now()
-
-func saveToTable(stmt *sql.Stmt, r *data.TestResult) (sql.Result, error) {
+func saveToTable(stmt *sql.Stmt, r data.TestResult) (sql.Result, error) {
 	result, err := stmt.Exec(r.StudentNumber, r.TestID, r.FirstName, r.LastName, r.SummaryMarks.Available, r.SummaryMarks.Obtained, r.ScannedOn, Now)
 	if err != nil {
 		return nil, err
 	}
+
 	return result, nil
+}
+
+type DBMarksRecord struct {
+	StudentId, Available, Obtained int
+}
+
+func getMarks(rows *sql.Rows) (record []DBMarksRecord, err error) {
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			studentNumber, marksAvailable, marksObtained int
+		)
+
+		if err := rows.Scan(&studentNumber, &marksAvailable, &marksObtained); err != nil {
+			log.Errorf("error copying from columns: %v", err)
+		}
+
+		log.Infof("found row containing %d, %d, %d", studentNumber, marksAvailable, marksObtained)
+
+		record = append(record, DBMarksRecord{studentNumber, marksAvailable, marksObtained})
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Errorf("error preparing row: %v", err)
+		return record, err
+	}
+
+	return record, nil
 }

@@ -1,40 +1,51 @@
 package aggregate
 
 import (
-	"encoding/json"
 	"github.com/montanaflynn/stats"
-	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/data"
+	"github.com/techworldhello/markr/internal/db"
 )
 
-func CalculateAverage(scores []float64) string {
+func CalculateAverage(records []db.DBMarksRecord) data.Aggregate {
 	var (
-		mean, _ = stats.Mean(scores)
-		stdDev, _ = stats.StandardDeviation(scores)
-		min, _ = stats.Min(scores)
-		max, _ = stats.Max(scores)
-		p25, _ = stats.PercentileNearestRank(scores, 25)
-		p50, _ = stats.PercentileNearestRank(scores, 50)
-		p75, _ = stats.PercentileNearestRank(scores, 75)
+		obtained []float64
+		available int
 	)
 
-	var a data.Aggregate
-	a.Mean = getPercentage(mean)
-	a.Stddev = getPercentage(stdDev)
-	a.Min = getPercentage(min)
-	a.Max = getPercentage(max)
-	a.P25 = getPercentage(p25)
-	a.P50 = getPercentage(p50)
-	a.P75 = getPercentage(p75)
-	a.Count = len(scores)
+	duplicates := map[int]bool{}
 
-	aggregateBytes, err := json.Marshal(&a)
-	if err != nil {
-		log.Errorf("error marshalling aggregate struct to json: %v", err)
+	for _, record := range records {
+		if record.Available > available {
+			available = record.Available
+		}
+		if !duplicates[record.StudentId] {
+			duplicates[record.StudentId] = true
+			obtained = append(obtained, float64(record.Obtained))
+		}
 	}
-	return string(aggregateBytes)
+
+	var (
+		mean, _ = stats.Mean(obtained)
+		stdDev, _ = stats.StandardDeviation(obtained)
+		min, _ = stats.Min(obtained)
+		max, _ = stats.Max(obtained)
+		p25, _ = stats.PercentileNearestRank(obtained, 25)
+		p50, _ = stats.PercentileNearestRank(obtained, 50)
+		p75, _ = stats.PercentileNearestRank(obtained, 75)
+	)
+
+	return data.Aggregate{
+		Mean: getPercentage(mean, available),
+		Stddev: getPercentage(stdDev, available),
+		Min: getPercentage(min, available),
+		Max: getPercentage(max, available),
+		P25: getPercentage(p25, available),
+		P50: getPercentage(p50, available),
+		P75: getPercentage(p75, available),
+		Count: len(obtained),
+	}
 }
 
-func getPercentage(stat float64) float64 {
-	return stat / 20 * 100
+func getPercentage(stat float64, total int) float64 {
+	return stat / float64(total) * 100
 }

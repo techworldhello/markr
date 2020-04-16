@@ -1,12 +1,9 @@
 START TRANSACTION;
 
--- Create database markr if not already initialised by docker config
-
+-- Create DB if not already initialised by docker config
 CREATE DATABASE IF NOT EXISTS markr;
 
 USE markr;
-
--- Create table within DB named student_result
 
 CREATE TABLE IF NOT EXISTS student_result (
   id bigint primary key AUTO_INCREMENT,
@@ -17,11 +14,10 @@ CREATE TABLE IF NOT EXISTS student_result (
   total_available smallint NOT NULL,
   total_obtained smallint NOT NULL,
   scanned_on timestamp NOT NULL,
-  created_at timestamp NOT NULL
+  created_at timestamp,
+  INDEX (test_id)
 );
 
--- Create index on test_id column
-
-ALTER TABLE student_result ADD INDEX (test_id);
+SET time_zone='+00:00';
 
 COMMIT;

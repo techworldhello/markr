@@ -1,15 +1,22 @@
 package api
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+	"github.com/techworldhello/markr/internal/aggregate"
 	"github.com/techworldhello/markr/internal/data"
 	"github.com/techworldhello/markr/internal/db"
 	"net/http"
 	"strings"
 )
+
+type DatabaseManager interface {
+	SaveResults(data data.McqTestResults) error
+	RetrieveMarks(testId string) ([]db.DBMarksRecord, error)
+}
 
 func CreateServer(c *Controller) *mux.Router {
 	router := mux.NewRouter()
@@ -20,7 +27,7 @@ func CreateServer(c *Controller) *mux.Router {
 }
 
 type Controller struct{
-	db.Database
+	DatabaseManager
 }
 
 func (c Controller) saveResult(w http.ResponseWriter, r *http.Request) {
@@ -49,20 +56,23 @@ func (c Controller) handleSave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var data data.McqTestResults
+	var testResults data.McqTestResults
 
 	decoder := xml.NewDecoder(r.Body)
-	if err := decoder.Decode(&data); err != nil {
+	if err := decoder.Decode(&testResults); err != nil {
 		log.Errorf("error unmarshalling request body: %v", err)
 	}
 
-	if missing := fieldsAreMissing(data); missing != false {
-		log.Warnf("field/s are missing from result data: %+v", data)
+	log.Printf("testResults: %+v", testResults.Results)
+
+
+	if missing := fieldsAreMissing(testResults); missing != false {
+		log.Warnf("field/s are missing from result data: %+v", testResults)
 		writeResp(w, http.StatusUnprocessableEntity, "Incomplete data - please check that all fields are fulfilled.")
 		return
 	}
 
-	if err := c.Save(data); err != nil {
+	if err := c.SaveResults(testResults); err != nil {
 		log.Errorf("error savings results: %v", err)
 		handleDbProcessingError(w)
 		return
@@ -79,17 +89,30 @@ func (c Controller) handleAggregate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	scores, err := c.RetrieveScores(testID)
+	records, err := c.RetrieveMarks(testID)
 	if err != nil {
-		log.Errorf("error retrieving scores for test ID %s: %v", testID, err)
+		log.Errorf("error retrieving marks for test ID %s: %v", testID, err)
 		handleDbProcessingError(w)
 		return
 	}
 
-	if len(scores) == 0 {
+	if len(records) == 0 {
 		writeResp(w, http.StatusNotFound, fmt.Sprintf("No results were found for Test ID %s", testID))
 		return
 	}
 
-	writeResults(w, scores)
+	writeResultResp(w, aggregate.CalculateAverage(records))
+}
+
+func writeResultResp(w http.ResponseWriter, result data.Aggregate) {
+	resultBytes, err := json.Marshal(&result)
+	if err != nil {
+		log.Errorf("error marshalling struct to json: %v", err)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = fmt.Fprint(w, string(resultBytes))
+	if err != nil {
+		log.Errorf("error writing to stream: %v", err)
+	}
 }

@@ -1,11 +1,14 @@
-FROM golang:1.14-alpine3.11 AS builder
-
-ENV CGO_ENABLED=0
+FROM golang:1.14
 
 WORKDIR /app
 
-COPY . .
+COPY go.mod .
+COPY go.sum .
 
 RUN go mod download
 
-RUN go build -o markr .
+COPY . /app
+
+RUN go install -v ./...
+
+CMD ["go", "run", "cmd/main.go", "cmd/logger.go"]
