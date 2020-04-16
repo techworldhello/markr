@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -23,6 +22,7 @@ func CreateServer(c *Controller) *mux.Router {
 
 	router.HandleFunc("/import", c.saveResult)
 	router.HandleFunc("/results/{test-id}/aggregate", c.getAggregate)
+	router.HandleFunc("/status", checkStatus)
 	return router
 }
 
@@ -47,6 +47,14 @@ func (c Controller) getAggregate(w http.ResponseWriter, r *http.Request) {
 		handleIncorrectProtocol(w, r)
 	default:
 		c.handleAggregate(w, r)
+	}
+}
+
+func checkStatus(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	_, err := fmt.Fprint(w, `{"status": "healthy"}`)
+	if err != nil {
+		log.Errorf("error writing to stream: %v", err)
 	}
 }
 
@@ -102,17 +110,4 @@ func (c Controller) handleAggregate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeResultResp(w, aggregate.CalculateAverage(records))
-}
-
-func writeResultResp(w http.ResponseWriter, result data.Aggregate) {
-	resultBytes, err := json.Marshal(&result)
-	if err != nil {
-		log.Errorf("error marshalling struct to json: %v", err)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	_, err = fmt.Fprint(w, string(resultBytes))
-	if err != nil {
-		log.Errorf("error writing to stream: %v", err)
-	}
 }

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/data"
@@ -10,8 +11,20 @@ import (
 
 func writeResp(w http.ResponseWriter, statusCode int, message string) {
 	w.WriteHeader(statusCode)
-	w.Header().Set("Content-Type", "application/json")
 	_, err := fmt.Fprint(w, fmt.Sprintf(`{"statusCode": %d, "message": "%s"}`, statusCode, message))
+	if err != nil {
+		log.Errorf("error writing to stream: %v", err)
+	}
+}
+
+func writeResultResp(w http.ResponseWriter, result data.Aggregate) {
+	resultBytes, err := json.Marshal(&result)
+	if err != nil {
+		log.Errorf("error marshalling struct to json: %v", err)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = fmt.Fprint(w, string(resultBytes))
 	if err != nil {
 		log.Errorf("error writing to stream: %v", err)
 	}
