@@ -18,6 +18,7 @@ func CalculateAverage(records []db.DBMarksRecord) data.Aggregate {
 		if record.Available > available {
 			available = record.Available
 		}
+		// As student ID and obtained marks were returned in descending order, we can disregard any repeating records
 		if !duplicates[record.StudentId] {
 			duplicates[record.StudentId] = true
 			obtained = append(obtained, float64(record.Obtained))

@@ -7,13 +7,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/data"
 	"os"
-	"sync"
 	"time"
 )
 
 type Store struct {
 	Db *sql.DB
-	mu sync.RWMutex
 }
 
 func New(db *sql.DB) *Store {
@@ -43,9 +41,6 @@ func OpenConnection() (*sql.DB, error) {
 }
 
 func (s Store) SaveResults(data data.McqTestResults) error {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
 	txn, err := s.Db.Begin()
 	if err != nil {
 		log.Errorf("error starting db transaction: %v", err)
@@ -59,10 +54,10 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
 		return err
 	}
 
-	for _, result := range data.Results {
+	for i, result := range data.Results {
 		sqlSum, err := saveToTable(stmt, result)
 		if err != nil {
-			log.Errorf("error saving record: %v", err)
+			log.Errorf("error saving record no.%d: %v", i, err)
 			return err
 		}
 		rs, err := sqlSum.RowsAffected()

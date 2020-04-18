@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/techworldhello/markr/internal/data"
 	"github.com/techworldhello/markr/internal/db"
@@ -36,7 +37,7 @@ func TestSaveResultWithIncompleteReqBody(t *testing.T) {
 	assert.Equal(t, `{"statusCode": 422, "message": "Incomplete data - please check that all fields are fulfilled."}`, recorder.Body.String())
 }
 
-func TestSaveResultFail(t *testing.T) {
+func TestSaveResultFails(t *testing.T) {
 	expectations := []struct {
 		name       string
 		url        string
@@ -72,24 +73,59 @@ func TestSaveResultFail(t *testing.T) {
 	}
 }
 
-func TestGetAggregateReturns200(t *testing.T) {
+func TestHandleAggregateReturns200(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	testRequest, _ := http.NewRequest("GET", "/results/1234/aggregate", nil)
 
-	c := Controller{MockStore{}}
-	c.getAggregate(recorder, testRequest)
+	c := Controller{MockStore{func(testId string) (records []db.DBMarksRecord, e error) {
+		return []db.DBMarksRecord{{"1234", 20, 13}}, nil
+	}}}
+
+	c.handleAggregate(recorder, testRequest)
 
 	assert.Equal(t, 200, recorder.Code)
 	assert.Equal(t, `{"mean":65,"stddev":0,"min":65,"max":65,"p25":65,"p50":65,"p75":65,"count":1}`, recorder.Body.String())
 }
 
-type MockStore struct {}
+func TestHandleAggregateReturnsNoRecords(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	testRequest, _ := http.NewRequest("GET", "/results/1234/aggregate", nil)
+
+	c := Controller{MockStore{func(testId string) (records []db.DBMarksRecord, e error) {
+		return []db.DBMarksRecord{}, nil
+	}}}
+
+	c.handleAggregate(recorder, testRequest)
+
+	assert.Equal(t, 404, recorder.Code)
+	assert.Equal(t, `{"statusCode": 404, "message": "No results were found for Test ID 1234"}`, recorder.Body.String())
+}
+
+func TestHandleAggregateReturns500(t *testing.T) {
+	recorder := httptest.NewRecorder()
+
+	testRequest, _ := http.NewRequest("GET", "/results/1234/aggregate", nil)
+
+	c := Controller{MockStore{func(testId string) (records []db.DBMarksRecord, e error) {
+		return []db.DBMarksRecord{}, errors.New("DB error!")
+	}}}
+
+	c.handleAggregate(recorder, testRequest)
+
+	assert.Equal(t, 500, recorder.Code)
+	assert.Equal(t, `{"statusCode": 500, "message": "Error processing record/s."}`, recorder.Body.String())
+}
+
+type MockStore struct {
+	mockRetrieveMarks func(testId string) ([]db.DBMarksRecord, error)
+}
 
 func (m MockStore) SaveResults(data data.McqTestResults) error {
 	return nil
 }
 
 func (m MockStore) RetrieveMarks(testId string) ([]db.DBMarksRecord, error) {
-	return []db.DBMarksRecord{{"1234", 20, 13}}, nil
+	return m.mockRetrieveMarks(testId)
 }
