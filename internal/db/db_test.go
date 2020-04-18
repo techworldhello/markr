@@ -16,15 +16,15 @@ func TestSaveResults(t *testing.T) {
 	defer sqlDb.Close()
 
 	mock.ExpectBegin()
-	mock.ExpectPrepare("INSERT INTO student_result")
-	mock.ExpectExec("INSERT INTO student_result").
-		WithArgs(1234, 1, "Daniel", "Craig", 20, 18, data.ScannedTime, Now).
+	mock.ExpectPrepare("INSERT INTO student_results")
+	mock.ExpectExec("INSERT INTO student_results").
+		WithArgs("1234", "1", "Daniel", "Craig", 20, 18, data.ScannedTime, Now).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("INSERT INTO student_result").
-		WithArgs(4321, 2, "Jane", "Doe", 20, 10, data.ScannedTime, Now).
+		WithArgs("4321", "2", "Jane", "Doe", 20, 10, data.ScannedTime, Now).
 		WillReturnResult(sqlmock.NewResult(2, 1))
 	mock.ExpectExec("INSERT INTO student_result").
-		WithArgs(1212, 3, "Spongebob", "Squarepants", 20, 14, data.ScannedTime, Now).
+		WithArgs("1212", "3", "Spongebob", "Squarepants", 20, 14, data.ScannedTime, Now).
 		WillReturnResult(sqlmock.NewResult(3, 1))
 	mock.ExpectCommit()
 
@@ -54,5 +54,5 @@ func TestRetrieveMarks(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	assert.Equal(t, []DBMarksRecord{{1234, 20, 13}}, marks)
+	assert.Equal(t, []DBMarksRecord{{testId, 20, 13}}, marks)
 }

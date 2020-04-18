@@ -43,7 +43,7 @@ func fieldsAreMissing(m data.McqTestResults) bool {
 		return true
 	}
 	for _, result := range m.Results {
-		if result.StudentNumber == 0 || result.TestID == 0 ||
+		if result.StudentNumber == "" || result.TestID == "" ||
 			result.FirstName == "" || result.LastName == "" ||
 			result.SummaryMarks.Obtained == 0 || result.SummaryMarks.Available == 0 ||
 			result.ScannedOn == (time.Time{}) {

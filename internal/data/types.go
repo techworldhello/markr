@@ -1,20 +1,17 @@
 package data
 
-import (
-	"time"
-)
+import "time"
 
 type McqTestResults struct {
 	Results []TestResult `xml:"mcq-test-result"`
 }
 
 type TestResult struct {
-	CreatedAt     time.Time
-	ScannedOn     time.Time     `xml:"scanned-on,attr"`
-	FirstName     string        `xml:"first-name"`
-	LastName      string        `xml:"last-name"`
-	StudentNumber int           `xml:"student-number"`
-	TestID        int           `xml:"test-id"`
+	ScannedOn     time.Time    `xml:"scanned-on,attr"`
+	FirstName     string       `xml:"first-name"`
+	LastName      string       `xml:"last-name"`
+	StudentNumber string       `xml:"student-number"`
+	TestID        string       `xml:"test-id"`
 	SummaryMarks  SummaryMarks `xml:"summary-marks"`
 }
 

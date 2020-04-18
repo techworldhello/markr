@@ -91,5 +91,5 @@ func (m MockStore) SaveResults(data data.McqTestResults) error {
 }
 
 func (m MockStore) RetrieveMarks(testId string) ([]db.DBMarksRecord, error) {
-	return []db.DBMarksRecord{{1234, 20, 13}}, nil
+	return []db.DBMarksRecord{{"1234", 20, 13}}, nil
 }

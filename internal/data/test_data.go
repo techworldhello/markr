@@ -80,8 +80,8 @@ func GetTestResults() McqTestResults{
 				ScannedOn: ScannedTime,
 				FirstName: "Daniel",
 				LastName: "Craig",
-				StudentNumber: 1234,
-				TestID: 1,
+				StudentNumber: "1234",
+				TestID: "1",
 				SummaryMarks: SummaryMarks{
 					Available: 20,
 					Obtained: 18,
@@ -91,8 +91,8 @@ func GetTestResults() McqTestResults{
 				ScannedOn: ScannedTime,
 				FirstName: "Jane",
 				LastName: "Doe",
-				StudentNumber: 4321,
-				TestID: 2,
+				StudentNumber: "4321",
+				TestID: "2",
 				SummaryMarks: SummaryMarks{
 					Available: 20,
 					Obtained: 10,
@@ -102,8 +102,8 @@ func GetTestResults() McqTestResults{
 				ScannedOn: ScannedTime,
 				FirstName: "Spongebob",
 				LastName: "Squarepants",
-				StudentNumber: 1212,
-				TestID: 3,
+				StudentNumber: "1212",
+				TestID: "3",
 				SummaryMarks: SummaryMarks{
 					Available: 20,
 					Obtained: 14,

@@ -9,10 +9,10 @@ import (
 
 func TestCalculateAverage(t *testing.T) {
 	marks := []db.DBMarksRecord{
-		{1234, 19, 17},
-		{1234, 20, 15},
-		{0000, 18, 19},
-		{1111, 20, 16},
+		{"1234", 19, 17},
+		{"1234", 20, 15},
+		{"0000", 18, 19},
+		{"1111", 20, 16},
 	}
 
 	result := CalculateAverage(marks)
