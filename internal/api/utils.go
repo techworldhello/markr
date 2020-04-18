@@ -34,8 +34,8 @@ func handleIncorrectProtocol(w http.ResponseWriter, r *http.Request) {
 	writeResp(w, http.StatusForbidden, fmt.Sprintf("Protocol %s not supported for endpoint %s", r.Method, r.RequestURI))
 }
 
-func handleDbProcessingError(w http.ResponseWriter) {
-	writeResp(w, http.StatusInternalServerError, "Error processing record/s - please try again later.")
+func handleProcessingError(w http.ResponseWriter) {
+	writeResp(w, http.StatusInternalServerError, "Error processing record/s.")
 }
 
 func fieldsAreMissing(m data.McqTestResults) bool {

@@ -20,7 +20,7 @@ func TestSaveResultReturns200(t *testing.T) {
 	c.saveResult(recorder, testRequest)
 
 	assert.Equal(t, 200, recorder.Code)
-	assert.Equal(t, `{"statusCode": 200, "message": "Record successfully saved"}`, recorder.Body.String())
+	assert.Equal(t, `{"statusCode": 200, "message": "Record/s successfully saved"}`, recorder.Body.String())
 }
 
 func TestSaveResultWithIncompleteReqBody(t *testing.T) {

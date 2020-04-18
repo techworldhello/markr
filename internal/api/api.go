@@ -69,10 +69,9 @@ func (c Controller) handleSave(w http.ResponseWriter, r *http.Request) {
 	decoder := xml.NewDecoder(r.Body)
 	if err := decoder.Decode(&testResults); err != nil {
 		log.Errorf("error unmarshalling request body: %v", err)
+		handleProcessingError(w)
+		return
 	}
-
-	log.Printf("testResults: %+v", testResults.Results)
-
 
 	if missing := fieldsAreMissing(testResults); missing != false {
 		log.Warnf("field/s are missing from result data: %+v", testResults)
@@ -82,11 +81,13 @@ func (c Controller) handleSave(w http.ResponseWriter, r *http.Request) {
 
 	if err := c.SaveResults(testResults); err != nil {
 		log.Errorf("error savings results: %v", err)
-		handleDbProcessingError(w)
+		handleProcessingError(w)
 		return
 	}
 
-	writeResp(w, http.StatusOK, "Record successfully saved")
+	log.Infof("saved results: %v", testResults)
+
+	writeResp(w, http.StatusOK, "Record/s successfully saved")
 }
 
 func (c Controller) handleAggregate(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +101,7 @@ func (c Controller) handleAggregate(w http.ResponseWriter, r *http.Request) {
 	records, err := c.RetrieveMarks(testID)
 	if err != nil {
 		log.Errorf("error retrieving marks for test ID %s: %v", testID, err)
-		handleDbProcessingError(w)
+		handleProcessingError(w)
 		return
 	}
 
