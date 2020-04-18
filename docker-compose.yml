@@ -4,8 +4,9 @@ services:
     build: .
     ports:
       - '4567:4567'
+    command: ["go", "run", "cmd/main.go", "cmd/logger.go"]
     environment:
-      MYSQL_DATABASE: markr
+      MYSQL_DATABASE: markr_db
       MYSQL_HOST_PORT: 3306
       MYSQL_HOST_URL: db
       USERNAME: root
@@ -19,7 +20,10 @@ services:
     volumes:
       - ./db:/docker-entrypoint-initdb.d
     environment:
-      MYSQL_DATABASE: markr
+      MYSQL_DATABASE: markr_db
       MYSQL_ROOT_PASSWORD: password
     ports:
       - '3306:3306'
+  tests:
+    build: .
+    command: ["go", "test", "./...", "-cover"]

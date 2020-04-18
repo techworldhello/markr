@@ -1,9 +1,9 @@
 START TRANSACTION;
 
 -- Create DB if not already initialised by docker config
-CREATE DATABASE IF NOT EXISTS markr;
+CREATE DATABASE IF NOT EXISTS markr_db;
 
-USE markr;
+USE markr_db;
 
 CREATE TABLE IF NOT EXISTS student_results (
   id bigint primary key AUTO_INCREMENT,

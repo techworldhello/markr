@@ -24,7 +24,7 @@ func TestSaveResults(t *testing.T) {
 		WithArgs("4321", "2", "Jane", "Doe", 20, 10, data.ScannedTime, Now).
 		WillReturnResult(sqlmock.NewResult(2, 1))
 	mock.ExpectExec("INSERT INTO student_result").
-		WithArgs("1212", "3", "Spongebob", "Squarepants", 20, 14, data.ScannedTime, Now).
+		WithArgs("1212", "2", "Spongebob", "Squarepants", 20, 14, data.ScannedTime, Now).
 		WillReturnResult(sqlmock.NewResult(3, 1))
 	mock.ExpectCommit()
 
@@ -41,7 +41,7 @@ func TestRetrieveMarks(t *testing.T) {
 	}
 	defer sqlDb.Close()
 
-	var testId = "1234"
+	var testId = "1"
 
 	mock.ExpectQuery("^SELECT student_number, total_available, total_obtained FROM*").
 		WithArgs(testId).
@@ -54,5 +54,5 @@ func TestRetrieveMarks(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	assert.Equal(t, []DBMarksRecord{{testId, 20, 13}}, marks)
+	assert.Equal(t, []DBMarksRecord{{"1234", 20, 13}}, marks)
 }

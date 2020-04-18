@@ -103,7 +103,7 @@ func GetTestResults() McqTestResults{
 				FirstName: "Spongebob",
 				LastName: "Squarepants",
 				StudentNumber: "1212",
-				TestID: "3",
+				TestID: "2",
 				SummaryMarks: SummaryMarks{
 					Available: 20,
 					Obtained: 14,
