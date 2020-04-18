@@ -8,7 +8,7 @@ USE markr_db;
 CREATE TABLE IF NOT EXISTS student_results (
   id bigint primary key AUTO_INCREMENT,
   student_number varchar(120) NOT NULL,
-  test_id string varchar(120) NULL,
+  test_id varchar(120) NOT NULL,
   first_name varchar(256) NOT NULL,
   last_name varchar(256) NOT NULL,
   total_available smallint NOT NULL,
