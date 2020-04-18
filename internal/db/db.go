@@ -2,9 +2,11 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/data"
+	"os"
 	"sync"
 	"time"
 )
@@ -19,7 +21,13 @@ func New(db *sql.DB) *Store {
 }
 
 func OpenConnection() (*sql.DB, error) {
-	db, err := sql.Open("mysql", "root:password@tcp(db:3306)/markr")
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8",
+		os.Getenv("USERNAME"),
+		os.Getenv("PASSWORD"),
+		os.Getenv("MYSQL_HOST_URL"),
+		os.Getenv("MYSQL_HOST_PORT"),
+		os.Getenv("MYSQL_DATABASE")))
+
 	if err != nil {
 		log.Errorf("error connecting to db: %+v", err)
 		return nil, err
@@ -46,7 +54,7 @@ func (s Store) SaveResults(data data.McqTestResults) error {
 
 	stmt, err := txn.Prepare(`INSERT INTO student_result 
 (student_number, test_id, first_name, last_name, total_available, total_obtained, scanned_on, created_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return err
 	}

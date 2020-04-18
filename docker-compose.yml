@@ -6,8 +6,10 @@ services:
       - '4567:4567'
     environment:
       MYSQL_DATABASE: markr
-      MYSQL_USERNAME: root
-      MYSQL_PASSWORD: password
+      MYSQL_HOST_PORT: 3306
+      MYSQL_HOST_URL: db
+      USERNAME: root
+      PASSWORD: password
     volumes:
       - './:/app'
     depends_on:
