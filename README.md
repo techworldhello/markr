@@ -10,13 +10,13 @@ Endpoints available:
 
 Examples when used locally:
 ```
-curl -X POST -H 'Content-Type: text/xml+markr' http://localhost:4567/import -d @- <<XML
+$ curl -X POST -H 'Content-Type: text/xml+markr' http://localhost:4567/import -d @- <<XML
     <mcq-test-results>
         <mcq-test-result scanned-on="2017-12-04T12:12:10+11:00">
             <first-name>Jane</first-name>
             <last-name>Austin</last-name>
             <student-number>002299</student-number>
-            <test-id>123</test-id>
+            <test-id>1234</test-id>
             <summary-marks available="20" obtained="13" />
         </mcq-test-result>
     </mcq-test-results>
@@ -24,11 +24,11 @@ XML
 ```
 
 ```
-curl http://localhost:4567/results/1234/aggregate
+$ curl http://localhost:4567/results/1234/aggregate
 ```
 
 ```
-curl http://localhost:4567/status
+$ curl http://localhost:4567/status
 ```
 
 
@@ -39,7 +39,7 @@ curl http://localhost:4567/status
 Clone the app and `cd` into it (you should be in the root directory), then run:
 
 ```
-make start
+$ make start
 ```
 When you see the following output, the app is accessible on http://localhost:4567 😌
 ![Alt text](./start-app.png)
@@ -49,7 +49,7 @@ When you see the following output, the app is accessible on http://localhost:456
 This will also output coverage.
 
 ```
-make test
+$ make test
 ```
 
 #### Access the app container
@@ -57,7 +57,7 @@ make test
 This will place you in the cli of the markr container.
 
 ```
-make dev
+$ make dev
 ```
 
 Run `go run cmd/*` to start the app.
@@ -68,7 +68,7 @@ Run `go run cmd/*` to start the app.
 Note this will also remove all of the records saved.
 
 ```
-make kill
+$ make kill
 ```
 
 
@@ -76,11 +76,11 @@ make kill
 
 * Since summary marks are provided for each student's result, their individual questions and answers don't need to be recorded
 * Currently all incoming requests are being saved, so the database cannot act as source of truth - it was more important to keep a record of everything and filter out bad data later
-
+* Highest available mark is always greater than obtained
 
 ### Tools used
 
-* Go 1.12
+* Go 1.14
 * Docker Engine 19.03.8
 * Golang 1.14 docker image
 * Alpine Linux 3.11 docker image
