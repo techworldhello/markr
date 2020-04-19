@@ -2,11 +2,9 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/data"
-	"os"
 	"time"
 )
 
@@ -16,28 +14,6 @@ type Store struct {
 
 func New(db *sql.DB) *Store {
 	return &Store{Db: db}
-}
-
-func OpenConnection() (*sql.DB, error) {
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8",
-		os.Getenv("USERNAME"),
-		os.Getenv("PASSWORD"),
-		os.Getenv("MYSQL_HOST_URL"),
-		os.Getenv("MYSQL_HOST_PORT"),
-		os.Getenv("MYSQL_DATABASE")))
-
-	if err != nil {
-		log.Errorf("error connecting to db: %+v", err)
-		return nil, err
-	}
-
-	if err = db.Ping(); err != nil {
-		log.Errorf("cannot ping db: %v", err)
-		return nil, err
-	}
-
-	log.Print("connection established")
-	return db, nil
 }
 
 func (s Store) SaveResults(data data.McqTestResults) error {
@@ -117,7 +93,7 @@ func getMarks(rows *sql.Rows) (record []DBMarksRecord, err error) {
 			log.Errorf("error copying from columns: %v", err)
 		}
 
-		log.Infof("found row containing %s, %d, %d", studentNumber, marksAvailable, marksObtained)
+		log.Debugf("found row containing %s, %d, %d", studentNumber, marksAvailable, marksObtained)
 
 		record = append(record, DBMarksRecord{studentNumber, marksAvailable, marksObtained})
 	}
