@@ -2,9 +2,9 @@ package main
 
 import (
 	"database/sql"
+	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/api"
 	"github.com/techworldhello/markr/internal/db"
-	"log"
 	"net/http"
 )
 

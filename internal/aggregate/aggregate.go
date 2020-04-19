@@ -2,28 +2,15 @@ package aggregate
 
 import (
 	"github.com/montanaflynn/stats"
+	log "github.com/sirupsen/logrus"
 	"github.com/techworldhello/markr/internal/data"
 	"github.com/techworldhello/markr/internal/db"
 )
 
 func CalculateAverage(records []db.DBMarksRecord) data.Aggregate {
-	var (
-		obtained  []float64
-		available int
-	)
-
-	duplicates := map[string]bool{}
-
-	for _, record := range records {
-		if record.Available > available {
-			available = record.Available
-		}
-		// As student ID and obtained marks were returned in descending order, we can disregard any repeating records
-		if !duplicates[record.StudentId] {
-			duplicates[record.StudentId] = true
-			obtained = append(obtained, float64(record.Obtained))
-		}
-	}
+	available, obtained := ensureCorrectResults(records)
+	log.Infof("total/available marks: %d", available)
+	log.Infof("obtained marks: %v", obtained)
 
 	var (
 		mean, _   = stats.Mean(obtained)
@@ -45,6 +32,22 @@ func CalculateAverage(records []db.DBMarksRecord) data.Aggregate {
 		P75:    getPercentage(p75, available),
 		Count:  len(obtained),
 	}
+}
+
+func ensureCorrectResults(records []db.DBMarksRecord) (available int, obtained []float64) {
+	idExists := map[string]bool{}
+
+	for _, record := range records {
+		if record.Available > available {
+			available = record.Available
+		}
+		// As student ID and obtained marks were returned in descending order, we can disregard any repeating records
+		if !idExists[record.StudentId] {
+			idExists[record.StudentId] = true
+			obtained = append(obtained, float64(record.Obtained))
+		}
+	}
+	return available, obtained
 }
 
 func getPercentage(stat float64, total int) float64 {
