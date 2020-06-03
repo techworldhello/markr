@@ -8,5 +8,5 @@ test:
 dev:
 	docker-compose run --service-ports --rm --entrypoint sh markr
 
-kill:
+clean:
 	docker-compose down

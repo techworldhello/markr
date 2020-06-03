@@ -68,7 +68,7 @@ Run `go run cmd/*` to start the app.
 Note this will also remove all of the records saved.
 
 ```
-$ make kill
+$ make clean
 ```
 
 
@@ -83,7 +83,6 @@ $ make kill
 * Go 1.14
 * Docker Engine 19.03.8
 * Golang 1.14 docker image
-* Alpine Linux 3.11 docker image
 * MySql 8.0 docker image
 
 

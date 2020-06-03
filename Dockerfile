@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine3.11
+FROM golang:1.14
 
 # Cgo enables the creation of Go packages that call C code
 ENV CGO_ENABLED=0
@@ -11,5 +11,3 @@ COPY go.sum .
 RUN go mod download
 
 COPY . /app
-
-RUN go install -v ./...
